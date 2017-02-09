@@ -13,6 +13,11 @@ class Users extends CI_Controller {
 			$this->load->view('/login/loginform');
 			
 		}
+		public function redirect_post()
+		{
+			$id = $this->input->post('thread_id');
+			$this->load->view('home/posts', $id);
+		}
 		public function reg()
 		{
 			$this->load->view('/login/register');
@@ -42,7 +47,6 @@ class Users extends CI_Controller {
 			
 			$this->load->view('/login/edit_user');
 		}
-	
 		public function register()
 		{
 			
@@ -165,7 +169,8 @@ class Users extends CI_Controller {
 	}
 	public function view_thread($thread_id){
 			$result['threads'] = $this->User_model->get_thread($thread_id);
-		
+			$result['post'] = $this->User_model->get_post($thread_id);
+			$result['reply'] =  $this->User_model->get_reply($thread_id);
 		
 			$this->load->view('/home/view', $result);
 		
@@ -177,21 +182,91 @@ class Users extends CI_Controller {
 		
 		
 		$this->load->view('/home/update', $result);
-	}
+	} 
 	
 	public function delete_thread($thread_id){
 		$this->User_model->delete_thread($thread_id);
 		redirect('Users/start');
 	}
-	public function view_post($thread_id){
-		
-			$results['posts'] = $this->User_model->get_post($thread_id);
-		
-			$this->load->view('/home/posts', $results);
-		
+	public function add_post(){
+		$this->load->helper(array('form', 'url')); 
+
+		$this->form_validation->set_rules('post_content', 'Post', 'required');
+
+		if($this->form_validation->run() == FALSE){
+			
+		}
+		else{
+			$this->load->model('User_model');
+			if($this->input->post()){
+				$data = array( 
+							'thread_id' 	=>$this->input->post('id'),
+							'username'		 =>$this->input->post('username'),
+							'date' 			=>date('d-m-Y H:i:s'),
+							'Content'		 =>$this->input->post('post_content')
+							);
+
+				
+					$result = $this->User_model->add_post($data);
+
+					redirect('/Users/start');
+
+			}
+		}
 	}
-	
-	
+
+	public function delete_post($post_id){
+		$data = array('Content' => "[DELETED]");
+		$this->User_model->delete_post($post_id, $data);
+		redirect('/Users/start');
+
+	}
+
+	public function get_post($post_id){
+		$result['post'] = $this->User_model->get_post_update($post_id);
+		$this->load->view('/home/update_post', $result);
+	}
+
+	public function update_post(){
+		$data = array("Content" => $this->input->post('post_content'));
+		
+		$this->User_model->update_post($data, $this->input->post('id'));
+		redirect('Users/start');
+	}	
+	public function add_reply()
+	{
+			$data['thread_id'] = array($this->input->post('thread_id'));
+			// $post_id =$this->input->post('post_id');
+			$this->load->view('/home/add_reply', $data);
+	}
+	public function create_reply()
+	{
+		$this->form_validation->set_rules('post_content', 'Post', 'required');
+
+		if($this->form_validation->run() == FALSE){
+			
+		}
+		else{
+			$this->load->model('User_model');
+			if($this->input->post()){
+				$data = array(
+							'post_id' 		=>$this->input->post('post_id'),
+							'thread_id' 	=>$this->input->post('id'),
+							'username'		 =>$this->input->post('username'),
+							'date' 			=>date('d-m-Y H:i:s'),
+							'Content'		 =>$this->input->post('reply_content')
+							);
+
+				
+					$result = $this->User_model->create_reply($data);
+
+					redirect('/Users/start');
+
+			}
+		}
+	}
+
+
 }
 	
 
