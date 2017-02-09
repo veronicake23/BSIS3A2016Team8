@@ -94,7 +94,7 @@
 			 		{
 			 	echo '<center>';
 			 	
-			 	echo "<p>username: $rep->username &nbsp&nbsp&nbsp&nbsp";
+			 	echo "<p>username: $rep->username &nbsp&nbsp|&nbsp&nbsp";
 			 	echo "Date: $rep->date <br>";
 			 	echo "$rep->comment";
 			 	echo '</p></center>';
